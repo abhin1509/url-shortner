@@ -1,12 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const shortid = require('shortid');
+const { customAlphabet } = require('nanoid');
 const app = express();
 const URL = require('./models/url');
 require('dotenv/config');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
+const idLength = 4;
 
 mongoose.connect(process.env.DB_CONNECTION, ({useNewUrlParser:true, useUnifiedTopology: true})).then( ()=>{
    console.log('Connected to db...');
@@ -20,6 +22,8 @@ sendResponse = (res, code, msg, obj) => {
    });
 }
 
+const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVXYZ', 5);
+
 app.post('/api', async (req, res) => {
    const { url } = req.body;
    //console.log(url);
@@ -32,7 +36,8 @@ app.post('/api', async (req, res) => {
       //    if (url) res.json(url);
       // }
       
-      const uniqueId = shortid.generate(); //TODO::generate a unique id
+      const uniqueId = nanoid(idLength);
+      //extra check if that id is already present.
       const shortUrl = `http://localhost:3000/${uniqueId}`;
 
       obj = new URL({url, shortUrl, uniqueId}); //instance of URL
